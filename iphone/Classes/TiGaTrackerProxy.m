@@ -46,7 +46,6 @@
         [self createTracker:_trackerId];
     }
     
-    
     [_tracker set:kGAIAnonymizeIp value:@"1"];
     [_tracker set:kGAIUseSecure value:[(_useSecure? @YES : @NO) stringValue]];
     //_tracker.allowIDFACollection = allowIDFACollection;
@@ -97,14 +96,26 @@
 
 -(void)addScreenView:(id)args
 {
+    ENSURE_SINGLE_ARG(args,NSDictionary);
+    ENSURE_TYPE(args,NSDictionary);
     ENSURE_UI_THREAD(addScreenView, args);
-    ENSURE_ARG_COUNT(args,1);
-    NSString* screen = [TiUtils stringValue:[args objectAtIndex:0]];
+
+
+    NSString* screenName = [TiUtils stringValue:@"screenName" properties:args];
+
+
     if(_debug){
-        NSLog(@"[DEBUG] addScreenView: %@", screen);
+        NSLog(@"[DEBUG] addScreenView: %@", screenName);
     }
-    [_tracker set:kGAIScreenName value:screen];
-    [_tracker send:[[GAIDictionaryBuilder createScreenView] build]];
+    [_tracker set:kGAIScreenName value:screenName];
+
+
+    GAIDictionaryBuilder *builder = [GAIDictionaryBuilder createScreenView];
+
+    [self handleCustomFields:builder jshash:args];
+
+    [_tracker send:[builder build]];
+
 }
 
 -(void)addEvent:(id)args
@@ -125,10 +136,15 @@
         NSLog(@"[DEBUG] addEvent value: %f", value);
     }
     
-    [_tracker send:[[GAIDictionaryBuilder createEventWithCategory:category
-                                                            action:action
-                                                            label:label
-                                                            value:value] build]];
+
+
+    GAIDictionaryBuilder *builder = [GAIDictionaryBuilder createEventWithCategory:category
+                                                                           action:action
+                                                                            label:label
+                                                                            value:value];
+    [self handleCustomFields:builder jshash:args];
+    [_tracker send:[builder build]];
+
 }
 
 -(void)addTiming:(id)args
@@ -149,10 +165,14 @@
         NSLog(@"[DEBUG] addTiming time: %f", time);
     }
     
-     [_tracker send:[[GAIDictionaryBuilder createTimingWithCategory:category
-                                                                interval:time
-                                                                name:name
-                                                                label:label]build]];
+
+
+     GAIDictionaryBuilder *builder = [GAIDictionaryBuilder createTimingWithCategory:category
+                                                                          interval:time
+                                                                              name:name
+                                                                             label:label];
+    [self handleCustomFields:builder jshash:args];
+    [_tracker send:[builder build]];
 }
 
 -(void)addException:(id)args
@@ -191,10 +211,44 @@
         NSLog(@"[DEBUG] addSocialNetwork target: %@", target);
     }
     
-    [_tracker send:[[GAIDictionaryBuilder createSocialWithNetwork:network
-                                                            action:action
-                                                           target:target] build]];
+
+    GAIDictionaryBuilder *builder = [GAIDictionaryBuilder createSocialWithNetwork:network
+                                                                           action:action
+                                                                           target:target];
+    [self handleCustomFields:builder jshash:args];
+    [_tracker send:[builder build]];
     
+}
+
+// Common way to deal with adding customDimension and customMetric fields
+-(void) handleCustomFields:(GAIDictionaryBuilder*) builder jshash:(id)args
+{
+    NSString *key;
+    NSString *val;
+    NSNumber *metricVal;
+    NSDictionary *customDimension;
+    NSDictionary *customMetric;
+
+
+    ENSURE_ARG_OR_NIL_FOR_KEY(customDimension, args, @"customDimension", NSDictionary);
+    if ([customDimension count]) {
+        for(key in customDimension) {
+            val = [customDimension objectForKey: key];
+            ENSURE_TYPE(val, NSString);
+            [builder set:val forKey:[GAIFields customDimensionForIndex:[key integerValue]]];
+
+        }
+    }
+
+    ENSURE_ARG_OR_NIL_FOR_KEY(customMetric, args, @"customMetric", NSDictionary);
+    if ([customMetric count]) {
+        for(key in customMetric) {
+            metricVal = [customMetric objectForKey: key];
+            ENSURE_TYPE(metricVal, NSNumber);
+            [builder set:[metricVal stringValue] forKey:[GAIFields customMetricForIndex:[key integerValue]]];
+        }
+    }
+
 }
 
 @end
