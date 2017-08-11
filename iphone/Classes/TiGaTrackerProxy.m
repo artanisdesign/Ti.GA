@@ -127,8 +127,10 @@
     NSString *category = [TiUtils stringValue:@"category" properties:args];
     NSString *action = [TiUtils stringValue:@"action" properties:args];
     NSString *label = [TiUtils stringValue:@"label" properties:args];
-    NSNumber *value = [NSNumber numberWithFloat:[TiUtils floatValue:@"value" properties:args]];
-    
+    NSNumber *value;
+    //NSNumber *value = [NSNumber numberWithFloat:[TiUtils floatValue:@"value" properties:args]];
+    ENSURE_ARG_OR_NIL_FOR_KEY(value, args, @"value", NSNumber);
+
     if(_debug){
         NSLog(@"[DEBUG] addEvent category: %@", category);
         NSLog(@"[DEBUG] addEvent action: %@", action);
