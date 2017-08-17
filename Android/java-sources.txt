@@ -1,0 +1,6 @@
+"/Users/Artanis/WORK/DOGFISH/Ti.GA/Android/src/ti/ga/TigaModule.java"
+"/Users/Artanis/WORK/DOGFISH/Ti.GA/Android/src/ti/ga/TrackerProxy.java"
+"/Users/Artanis/WORK/DOGFISH/Ti.GA/Android/build/generated/r/android/support/v7/appcompat/R.java"
+"/Users/Artanis/WORK/DOGFISH/Ti.GA/Android/build/generated/r/android/support/v7/cardview/R.java"
+"/Users/Artanis/WORK/DOGFISH/Ti.GA/Android/build/generated/r/ti/ga/R.java"
+"/Users/Artanis/WORK/DOGFISH/Ti.GA/Android/build/generated/r/ti/modules/titanium/ui/R.java"
